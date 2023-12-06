@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="https://fav.farm/🔥" />
+</head>
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+<script>
+const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+const cities=[];
+fetch(endpoint)
+  .then(blob=>blob.json())
+  .then(data=>cities.push(...data));
+function findMatches(wordtoMatch,cities){
+    return cities.filter(place=>{
+        const regex=new RegExp(wordtoMatch,'gi');
+        return place.city.match(regex) || place.state.match(regex)
+    });
+}
+const inputsearch=document.querySelector('.search');
+const suggestions=document.querySelector('.suggestions');
+
+function numbercommas(x){
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
+}
+
+function displayAns(){
+    const matching=findMatches(this.value,cities);
+    const html=matching.map(place=>{
+        const regex=new RegExp(this.value,'gi');
+        const cityname=place.city.replace(regex,`<span class="hl">${this.value}</span>`);
+        const statename=place.city.replace(regex,`<span class="hl">${this.value}</span>`);
+        return `
+           <li>
+               <span class="name">${cityname}, ${statename}</span>
+               <span class="population">${place.population}</span>
+           </li>
+        `;
+    }).join('');
+    suggestions.innerHTML=html;
+}
+inputsearch.addEventListener('change',displayAns);
+inputsearch.addEventListener('keyup',displayAns);
+</script>
+</body>
+</html>
